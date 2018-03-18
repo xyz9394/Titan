@@ -1,209 +1,101 @@
 (function() {
+
 	/**
 	 * Variables
 	 */
-	var user_id = '1111';
+	var user_id = '';
+	var user_fullname = '';
 	var lng = -122.08;
 	var lat = 37.38;
-	
+
+	/**
+	 * Initialize
+	 */
 	function init() {
 		// Register event listeners
+		$('login-btn').addEventListener('click', login);
+		$('register-btn').addEventListener('click', register);
 		$('nearby-btn').addEventListener('click', loadNearbyItems);
 		$('fav-btn').addEventListener('click', loadFavoriteItems);
 		$('recommend-btn').addEventListener('click', loadRecommendedItems);
 
-		initGeoLocation();
-		//loadNearbyItems;
-	}
-	
-	function $(tag, options) {
-		if (!options) {
-			return document.getElementById(tag);
-		}
+		validateSession();
 
-		var element = document.createElement(tag);
-
-		for ( var option in options) {
-			if (options.hasOwnProperty(option)) {
-				element[option] = options[option];
-			}
-		}
-
-		return element;
-	}
-
-
-	function showLoadingMessage(msg) {
-		var itemList = $('item-list');
-		itemList.innerHTML = '<p class="notice"><i class="fa fa-spinner fa-spin"></i> '+ msg + '</p>';
-	}
-
-	function showWarningMessage(msg) {
-	    var itemList = $('item-list');
-	    itemList.innerHTML = '<p class="notice"><i class="fa fa-exclamation-triangle"></i> ' + msg + '</p>';
-	}
-
-	function showErrorMessage(msg) {
-		var itemList = $('item-list');
-		itemList.innerHTML = '<p class="notice"><i class="fa fa-exclamation-circle"></i> ' + msg + '</p>';
-	}
-
-	function activeBtn(btnId) {
-		var btns = document.getElementsByClassName('main-nav-btn');
-
-		for (var i = 0; i < btns.length; i++) {
-			btns[i].className =btns[i].className.replace(/\bactive\b/, '');
-		}
-
-		// active the one that has id = btnId
-		var btn = $(btnId);
-		btn.className += ' active';
+		//onSessionValid({
+		//	user_id : '1111',
+		//	name : 'John Smith'
+		//});
 	}
 
 	/**
-	 * AJAX helper
-	 * 
-	 * @param method - GET|POST|PUT|DELETE
-	 * @param url - API end point
-	 * @param callback - This the successful callback
-	 * @param errorHandler - This is the failed callback
+	 * Session
 	 */
-	function ajax(method, url, data, callback, errorHandler) {
-	  var xhr = new XMLHttpRequest();
+	function validateSession() {
+		// The request parameters
+		var url = './login';
+		var req = JSON.stringify({});
 
-	  xhr.open(method, url, true);
+		// display loading message
+		showLoadingMessage('Validating session...');
 
-	  xhr.onload = function () {
-	    switch (xhr.status) {
-	      case 200:
-	        callback(xhr.responseText);
-	        break;
-	      case 403:
-	        onSessionInvalid();
-	        break;
-	      case 401:
-	        errorHandler();
-	        break;
-	    }
-	  };
+		// make AJAX call
+		ajax('GET', url, req,
+		// session is still valid
+		function(res) {
+			var result = JSON.parse(res);
 
-	  xhr.onerror = function () {
-	    console.error("The request couldn't be completed.");
-	    errorHandler();
-	  };
-
-	  if (data === null) {
-	    xhr.send();
-	  } else {
-	    xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-	    xhr.send(data);
-	  }
+			if (result.status === 'OK') {
+				onSessionValid(result);
+			}
+		});
 	}
 	
-	function listItems(items) {
-		// Clear the current results
-		var itemList = $('item-list');
-		itemList.innerHTML = ''; 
-		// when click nearby, empty the list first 
-		// and then load the new list
-		for (var i = 0; i < items.length; i++) {
-			addItem(itemList, items[i]);
-		}
-	}
-	// add item into main section
-	function addItem(itemList, item) {
-		var item_id = item.item_id;
-
-		// create the <li> tag and specify the id and class attributes
-		var li = $('li', {
-			id : 'item-' + item_id,
-			className : 'item'
-		});
-
-		// set the data attribute
-		li.dataset.item_id = item_id;
-		li.dataset.favorite = item.favorite;
-
-		// item image
-		if (item.image_url) { // if there is img, use the img url
-			li.appendChild($('img', {
-				src : item.image_url
-			}));
-		} else { // if no img, set a default img url
-			li.appendChild($('img', {
-				src : 'https://assets-cdn.github.com/images/modules/logos_page/GitHub-Mark.png'
-			}))
-		}
-		// section
-		var section = $('div', {});
-
-		// title
-		var title = $('a', {
-			href : item.url,
-			target : '_blank', // let user open a new tab when click
-			className : 'item-name'
-		});
-		title.innerHTML = item.name;
-		section.appendChild(title);
-
-		// category
-		var category = $('p', {
-			className : 'item-category'
-		});
-		// join the strings if there is more than one categary
-		category.innerHTML = 'Category: ' + item.categories.join(', '); 
-		section.appendChild(category);
-
-		var stars = $('div', {
-			className : 'stars'
-		});
+	function onSessionValid(result) {
+		user_id = result.user_id;
+		user_fullname = result.name;
 		
-		// make star icons according to rating
-		for (var i = 0; i < item.rating; i++) {
-			var star = $('i', {
-				className : 'fa fa-star'
-			});
-			stars.appendChild(star);
-		}
+		var loginForm = $('login-form');
+		var registerForm = $('register-form');
+		var itemNav = $('item-nav');
+		var itemList = $('item-list');
+		var avatar = $('avatar');
+		var welcomeMsg = $('welcome-msg');
+		var logoutBtn = $('logout-link');
 
-		if (('' + item.rating).match(/\.5$/)) {
-			stars.appendChild($('i', {
-				className : 'fa fa-star-half-o'   // half star
-			}));
-		}
+		welcomeMsg.innerHTML = 'Welcome, ' + user_fullname;
 
-		section.appendChild(stars);
+		showElement(itemNav);
+		showElement(itemList);
+		showElement(avatar);
+		showElement(welcomeMsg);
+		showElement(logoutBtn, 'inline-block');
+		hideElement(loginForm);
+		hideElement(registerForm);
 
-		li.appendChild(section);
-
-		// address
-		var address = $('p', {
-			className : 'item-address'
-		});
-
-		var addressHTML =  item.address + "<br/>" + item.city + "<br/>" + item.state;
-		address.innerHTML = addressHTML;
-
-		li.appendChild(address);
-
-		// favorite link
-		var favLink = $('p', {
-			className : 'fav-link'
-		});
-
-		favLink.onclick = function() {
-			changeFavoriteItem(item_id);
-		};
-
-		favLink.appendChild($('i', {
-			id : 'fav-icon-' + item_id,
-			className : item.favorite ? 'fa fa-heart' : 'fa fa-heart-o'
-		}));
-
-		li.appendChild(favLink);
-
-		itemList.appendChild(li);
+		initGeoLocation();
 	}
+
+	function onSessionInvalid() {
+
+		var loginForm = $('login-form');
+		var registerForm = $('register-form');
+		var itemNav = $('item-nav');
+		var itemList = $('item-list');
+		var avatar = $('avatar');
+		var welcomeMsg = $('welcome-msg');
+		var logoutBtn = $('logout-link');
+
+		hideElement(itemNav);
+		hideElement(itemList);
+		hideElement(avatar);
+		hideElement(logoutBtn);
+		hideElement(welcomeMsg);
+
+		showElement(loginForm);
+		showElement(registerForm);
+	}
+
+	
 	function initGeoLocation() {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(onPositionUpdated,
@@ -244,9 +136,222 @@
 			loadNearbyItems();
 		});
 	}
+
+	
+	// -----------------------------------
+	// Login
+	// -----------------------------------
+
+	function login() {
+		var username = $('username').value;
+		var password = $('password').value;
+		password = md5(username + md5(password));
+
+		// The request parameters
+		var url = './login';
+		var params = 'user_id=' + username + '&password=' + password;
+		var req = JSON.stringify({});
+
+		ajax('POST', url + '?' + params, req,
+		// successful callback
+		function(res) {
+			var result = JSON.parse(res);
+
+			// successfully logged in
+			if (result.status === 'OK') {
+				onSessionValid(result);
+			}
+		},
+		// error
+		function() {
+			showLoginError();
+		});
+	}
+
+	function showLoginError() {
+		$('login-error').innerHTML = 'Invalid username or password';
+	}
+
+	function clearLoginError() {
+		$('login-error').innerHTML = '';
+	}
+
+	// -----------------------------------
+	// Register
+	// -----------------------------------
+
+	function register() {
+		var rusername = $('rusername').value;
+		var rpassword = $('rpassword').value;
+		var rfirstname = $('rfirstname').value;
+		var rlastname = $('rlastname').value;
+		if (rpassword !== "") {
+			var newpassword = md5(rusername + md5(rpassword));
+
+			// The request parameters
+			var url = './register';
+			var params = 'user_id=' + rusername + '&password=' + newpassword + '&first_name=' + rfirstname + '&last_name=' + rlastname;
+			var req = JSON.stringify({});
+
+			ajax('POST', url + '?' + params, req,
+			// successful callback
+			function(res) {
+				var result = JSON.parse(res);
+				if (result.status === "OK") {
+					clearRegisterError();
+					showRegisterSuccess();
+				} 
+				if (result.status === "405") {
+					clearRegisterSuccess();
+					showRegisterError()
+				}
+			},
+			// error
+			function() {
+				showRegisterError();
+			});
+		} else {
+			showRegisterError();
+		}
+	}
+	function showRegisterError() {
+		$('register-error').innerHTML = 'Invalid username or password';
+	}
+	function clearRegisterError() {
+		$('register-error').innerHTML = '';
+	}
+	function showRegisterSuccess() {
+		$('register-success').innerHTML = 'Register success, please login';
+	}
+	function clearRegisterSuccess() {
+		$('register-success').innerHTML = '';
+	}
+	
+	// -----------------------------------
+	// Helper Functions
+	// -----------------------------------
+
+	/**
+	 * A helper function that makes a navigation button active
+	 * 
+	 * @param btnId -
+	 *            The id of the navigation button
+	 */
+	function activeBtn(btnId) {
+		var btns = document.getElementsByClassName('main-nav-btn');
+
+		// deactivate all navigation buttons
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].className = btns[i].className.replace(/\bactive\b/, '');
+		}
+
+		// active the one that has id = btnId
+		var btn = $(btnId);
+		btn.className += ' active';
+	}
+
+	function showLoadingMessage(msg) {
+		var itemList = $('item-list');
+		itemList.innerHTML = '<p class="notice"><i class="fa fa-spinner fa-spin"></i> '
+				+ msg + '</p>';
+	}
+
+	function showWarningMessage(msg) {
+		var itemList = $('item-list');
+		itemList.innerHTML = '<p class="notice"><i class="fa fa-exclamation-triangle"></i> '
+				+ msg + '</p>';
+	}
+
+	function showErrorMessage(msg) {
+		var itemList = $('item-list');
+		itemList.innerHTML = '<p class="notice"><i class="fa fa-exclamation-circle"></i> '
+				+ msg + '</p>';
+	}
+
+	/**
+	 * A helper function that creates a DOM element <tag options...>
+	 * 
+	 * @param tag
+	 * @param options
+	 * @returns
+	 */
+	function $(tag, options) {
+		if (!options) {
+			return document.getElementById(tag);
+		}
+
+		var element = document.createElement(tag);
+
+		for ( var option in options) {
+			if (options.hasOwnProperty(option)) {
+				element[option] = options[option];
+			}
+		}
+
+		return element;
+	}
+
+	function hideElement(element) {
+		element.style.display = 'none';
+	}
+
+	function showElement(element, style) {
+		var displayStyle = style ? style : 'block';
+		element.style.display = displayStyle;
+	}
+
+	/**
+	 * AJAX helper
+	 * 
+	 * @param method -
+	 *            GET|POST|PUT|DELETE
+	 * @param url -
+	 *            API end point
+	 * @param callback -
+	 *            This the successful callback
+	 * @param errorHandler -
+	 *            This is the failed callback
+	 */
+	function ajax(method, url, data, callback, errorHandler) {
+		var xhr = new XMLHttpRequest();
+
+		xhr.open(method, url, true);
+
+		xhr.onload = function() {
+			switch (xhr.status) {
+			case 200:
+				callback(xhr.responseText);
+				break;
+			case 403:
+				onSessionInvalid();
+				break;
+			case 401:
+				errorHandler();
+				break;
+			}
+		};
+
+		xhr.onerror = function() {
+			console.error("The request couldn't be completed.");
+			errorHandler();
+		};
+
+		if (data === null) {
+			xhr.send();
+		} else {
+			xhr.setRequestHeader("Content-Type",
+					"application/json;charset=utf-8");
+			xhr.send(data);
+		}
+	}
+
+	// -------------------------------------
+	// AJAX call server-side APIs
+	// -------------------------------------
+
 	/**
 	 * API #1 Load the nearby items API end point: [GET]
-	 * /Titan/search?user_id=1111&lat=37.38&lon=-122.08
+	 * /Dashi/search?user_id=1111&lat=37.38&lon=-122.08
 	 */
 	function loadNearbyItems() {
 		console.log('loadNearbyItems');
@@ -279,7 +384,7 @@
 
 	/**
 	 * API #2 Load favorite (or visited) items API end point: [GET]
-	 * /Titan/history?user_id=1111
+	 * /Dashi/history?user_id=1111
 	 */
 	function loadFavoriteItems() {
 		activeBtn('fav-btn');
@@ -307,7 +412,7 @@
 
 	/**
 	 * API #3 Load recommended items API end point: [GET]
-	 * /Titan/recommend?user_id=1111
+	 * /Dashi/recommendation?user_id=1111
 	 */
 	function loadRecommendedItems() {
 		activeBtn('recommend-btn');
@@ -322,7 +427,10 @@
 		showLoadingMessage('Loading recommended items...');
 
 		// make AJAX call
-		ajax('GET', url + '?' + params, req,
+		ajax(
+				'GET',
+				url + '?' + params,
+				req,
 				// successful callback
 				function(res) {
 					var items = JSON.parse(res);
@@ -337,12 +445,15 @@
 					showErrorMessage('Cannot load recommended items.');
 				});
 	}
+
 	/**
 	 * API #4 Toggle favorite (or visited) items
 	 * 
 	 * @param item_id -
 	 *            The item business id
 	 * 
+	 * API end point: [POST]/[DELETE] /Dashi/history request json data: {
+	 * user_id: 1111, visited: [a_list_of_business_ids] }
 	 */
 	function changeFavoriteItem(item_id) {
 		// Check whether this item has been visited or not
@@ -368,9 +479,132 @@
 			}
 		});
 	}
-	
+
+	// -------------------------------------
+	// Create item list
+	// -------------------------------------
+
+	/**
+	 * List items
+	 * 
+	 * @param items -
+	 *            An array of item JSON objects
+	 */
+	function listItems(items) {
+		// Clear the current results
+		var itemList = $('item-list');
+		itemList.innerHTML = '';
+
+		for (var i = 0; i < items.length; i++) {
+			addItem(itemList, items[i]);
+		}
+	}
+
+	/**
+	 * Add item to the list
+	 * 
+	 * @param itemList -
+	 *            The
+	 *            <ul id="item-list">
+	 *            tag
+	 * @param item -
+	 *            The item data (JSON object)
+	 */
+	function addItem(itemList, item) {
+		var item_id = item.item_id;
+
+		// create the <li> tag and specify the id and class attributes
+		var li = $('li', {
+			id : 'item-' + item_id,
+			className : 'item'
+		});
+
+		// set the data attribute
+		li.dataset.item_id = item_id;
+		li.dataset.favorite = item.favorite;
+
+		// item image
+		if (item.image_url) {
+			li.appendChild($('img', {
+				src : item.image_url
+			}));
+		} else {
+			li.appendChild($('img', {
+				src : 'https://assets-cdn.github.com/images/modules/logos_page/GitHub-Mark.png'
+			}))
+		}
+		// section
+		var section = $('div', {});
+
+		// title
+		var title = $('a', {
+			href : item.url,
+			target : '_blank',
+			className : 'item-name'
+		});
+		title.innerHTML = item.name;
+		section.appendChild(title);
+
+		// category
+		var category = $('p', {
+			className : 'item-category'
+		});
+		category.innerHTML = 'Category: ' + item.categories.join(', ');
+		section.appendChild(category);
+
+		// TODO(vincent). here we might have a problem showing 3.5 as 3.
+		// stars
+		var stars = $('div', {
+			className : 'stars'
+		});
+		
+		for (var i = 0; i < item.rating; i++) {
+			var star = $('i', {
+				className : 'fa fa-star'
+			});
+			stars.appendChild(star);
+		}
+
+		if (('' + item.rating).match(/\.5$/)) {
+			stars.appendChild($('i', {
+				className : 'fa fa-star-half-o'
+			}));
+		}
+
+		section.appendChild(stars);
+
+		li.appendChild(section);
+
+		// address
+		var address = $('p', {
+			className : 'item-address'
+		});
+		
+		var addressHTML = item.address + "<br/>" + item.city + "<br/>" + item.state;
+		address.innerHTML = addressHTML;
+		li.appendChild(address);
+
+		// favorite link
+		var favLink = $('p', {
+			className : 'fav-link'
+		});
+
+		favLink.onclick = function() {
+			changeFavoriteItem(item_id);
+		};
+
+		favLink.appendChild($('i', {
+			id : 'fav-icon-' + item_id,
+			className : item.favorite ? 'fa fa-heart' : 'fa fa-heart-o'
+		}));
+
+		li.appendChild(favLink);
+
+		itemList.appendChild(li);
+	}
+
 	init();
 
 })();
 
-
+// END

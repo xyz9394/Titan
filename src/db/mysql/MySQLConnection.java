@@ -82,7 +82,7 @@ public class MySQLConnection implements DBConnection{
 		}
 		Set<String> favoriteItems = new HashSet<>();
 		try {
-			String sql = "SELECT item_id from history WHERE user_id = ? ";
+			String sql = "SELECT * from history WHERE user_id = ?";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, userId);
 			ResultSet rs = statement.executeQuery();
@@ -159,7 +159,7 @@ public class MySQLConnection implements DBConnection{
 		}
 		Set<String> categories = new HashSet<>();
 		try {
-			String sql = "SELECT category from categories WHERE item_id = ? ";
+			String sql = "SELECT * from categories WHERE itemId = ?";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, itemId);
 			ResultSet rs = statement.executeQuery();
@@ -230,16 +230,15 @@ public class MySQLConnection implements DBConnection{
 		if (conn == null) {
 			return null;
 		}
-		String name = new String();
+		String name = "";
 		try {
-			String sql = "SELECT (first_name, last_name) from users WHERE user_id = ?";
+			String sql = "SELECT first_name, last_name from users WHERE user_id = ?";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, userId);
 			ResultSet rs = statement.executeQuery();
 			if (rs.next()) {
-				name = rs.getString("first_name") + " " + rs.getString("last_name");
+				name += String.join(" ", rs.getString("first_name"), rs.getString("last_name"));
 			}
-			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -252,9 +251,8 @@ public class MySQLConnection implements DBConnection{
 		if (conn == null) {
 			return false;
 		}
-		String name = new String();
 		try {
-			String sql = "SELECT (user_id, password) from users WHERE user_id = ? AND password = ?";
+			String sql = "SELECT user_id from users WHERE user_id = ? and password = ?";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, userId);
 			statement.setString(2, password);
@@ -262,13 +260,38 @@ public class MySQLConnection implements DBConnection{
 			if (rs.next()) {
 				return true;
 			}
-			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 		return false;
 	}
-
-
-
+	@Override
+	public boolean register(String username, String pwd, String firstname, String lastname) {
+		if (username == null || username.length() == 0) {
+			return false;
+		}
+		try {
+			String sql = "SELECT user_id from users WHERE user_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, username);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				return false;
+			} 
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			String sqladd = "INSERT INTO users (user_id, password, first_name, last_name) VALUES (?, ?, ?, ?)";
+			PreparedStatement statement2 = conn.prepareStatement(sqladd);
+			statement2.setString(1, username);
+			statement2.setString(2,  pwd);
+			statement2.setString(3, firstname);
+			statement2.setString(4,  lastname);
+			statement2.execute();
+		}catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return true;
+	}
 }

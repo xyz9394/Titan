@@ -21,7 +21,7 @@ ul {
  */
 .top-header {
   align-items: center;
-  background:  #DF574B;
+  background:  #356ca7;
   box-shadow:  0px 2px 10px #333333;
   display:     flex;
   height:      60px;
@@ -29,6 +29,21 @@ ul {
   top:         0;
   width:       100%;
   z-index:     1;
+}
+
+#avatar {
+  display: none;
+}
+
+.avatar {
+  background:    #FFFFFF;
+  border-radius: 50%;
+  color:         #333C4D;
+  height:        40px;
+  margin-right:  20px;
+  padding-left:  9px;
+  padding-top:   5px;
+  width:         40px;
 }
 
 /**
@@ -45,6 +60,20 @@ ul {
   text-decoration: none;
 }
 
+#logout-link {
+  color:           #F9F9F9;
+  display:         none;
+  font-weight:     400;
+  padding:         0 10px;
+  text-decoration: none;
+}
+
+#welcome-msg {
+  border-right:  1px solid #FFFFFF;
+  display:       none;
+  padding-right: 10px;
+}
+
 /**
  * main container
  */
@@ -59,7 +88,7 @@ ul {
  */
 .container > header {
   align-items:     center;
-  background:      url('http://prophoto.com.cy/wp-content/galleries/food/food-restaurant-photographer-cyprus-10.jpg') no-repeat 50% 50%;
+  background:      url('http://3.bp.blogspot.com/-8hlNavxtVDQ/VD8c5Eqb7oI/AAAAAAAAHZI/CYhXK3VZSjk/s1600/concert-crowd.jpg') no-repeat 50% 50%;
   background-size: 100%;
   display:         flex;
   height:          250px;
@@ -72,30 +101,114 @@ ul {
   line-height:  1em;
   margin-left:  220px;
   padding-left: 5px;
+  color: #818185;
 }
 
 .container > header span {
-  color: #FBAF41;
+  font-size: 40px;
+  color: #ff9868;
 }
+
+/**
+ * login form
+ */
+#login-form {
+  color: #f9f6ff;
+  margin: 0px auto;
+  overflow: auto;
+  padding: 40px;
+  width: 300px;
+}
+
+#login-form label {
+  display: block;
+}
+
+#login-form input {
+  border: none;
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+}
+
+#login-form button {
+  color: #FFFFFF
+  cursor: pointer;
+  float: right;
+  padding: 8px 20px;
+  text-align: right;
+}
+
+
+#login-error {
+  clear: both;
+  color: #990000;
+  padding-top: 10px;
+}
+
+/**
+ * register form
+ */
+#register-form {
+  color: #f9f6ff;
+  margin: 0px auto;
+  overflow: auto;
+  padding: 40px;
+  width: 300px;
+}
+
+#register-form label {
+  display: block;
+}
+
+#register-form input {
+  border: none;
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+}
+
+#register-form button {
+  color: #FFFFFF
+  cursor: pointer;
+  float: right;
+  padding: 8px 20px;
+  text-align: right;
+}
+
+#register-error {
+  clear: both;
+  color: #990000;
+  padding-top: 10px;
+}
+
+#register-success {
+  clear: both;
+  color: #fffff0;
+  padding-top: 10px;
+}
+
 
 /**
  * main section
  */
 .main-section {
-  background: #F3BB43;
+  background: #436aa2;
 }
 
 /**
  * aside
  */
 #item-nav {
-  display: block;
+  display: none;
   float: left;
   width: 180px;
 }
 
 .nav-icon {
-  color:      #624630;
+  color:      #FFFFFF;
   padding:    20px;
   text-align: center;
 }
@@ -133,7 +246,7 @@ ul {
 #item-list {
   background:  #F2EBD9;
   color:       #624630;
-  display:     block;
+  display:     none;
   list-style:  none;
   margin-left: 180px;
   min-height:  250px;
@@ -152,9 +265,11 @@ ul {
 .item {
   align-items:   center;
   border-bottom: 1px solid #FFFFFF;
+  
   display:       flex;
   margin:        10px;
   padding:       15px;
+  transition:    background-color 100ms linear;
 }
 
 .item:last-child {
@@ -163,6 +278,7 @@ ul {
 
 .item:hover {
   background: rgba(255, 255, 255, 0.8);
+  transition: background-color 100ms linear;
 }
 
 .item img {
@@ -239,10 +355,3 @@ footer ul {
 footer ul li {
   flex: 1;
 }
-
-#item-list .notice {
-  font-size:  16px;
-  padding:    60px;
-  text-align: center;
-}
-

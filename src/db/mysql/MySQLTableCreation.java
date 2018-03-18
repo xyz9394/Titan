@@ -67,7 +67,12 @@ public class MySQLTableCreation {
 			
 			// Step 4: insert data
 			// Create a fake user
-			sql = "INSERT INTO users " + "VALUES (\"1111\", \"3229c1097c00d497a0fd282d586be050\", \"John\", \"Smith\")";
+			sql = "INSERT INTO users " + "VALUES (\"zhengxy\", \"85f126b09e1201ef817b7e2dcc345f99\", \"Xinyuan\", \"Zheng\")";
+
+			System.out.println("Executing query:\n" + sql);
+			stmt.executeUpdate(sql);
+			
+			sql = "INSERT INTO users " + "VALUES (\"1111\", \"3229c1097c00d497a0fd282d586be050\", \"Public\", \"Guest\")";
 
 			System.out.println("Executing query:\n" + sql);
 			stmt.executeUpdate(sql);

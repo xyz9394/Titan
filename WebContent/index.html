@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="description" content="Item Recommendation">
   <meta name="author" content="Your Name">
-  <title>Item Recommendation Final</title>
-  <link rel="stylesheet" href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+  <title>Event Recommendation</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="styles/main.css">
 </head>
@@ -16,17 +16,43 @@
       <a href="#">Contact</a>
       <a href="#">About</a>
     </nav>
+    <span id="welcome-msg"></span>
+    <a id="logout-link" href="logout">Logout</a>
+    <i id="avatar" class="avatar fa fa-user fa-2x"></i>
   </header>
   
   <div class="container">
     <header>
       <p>
-        <span>Item</span>
-        <br/> Recommendation
+        <span>Event for you</span>
+        <br />Music, sports, whatever you like
       </p>
     </header>
 
     <section class="main-section">
+    
+      <div id="login-form">
+	    <label for="username">Username:</label>
+	    <input id="username" name="username" type="text">
+	    <label for="password">Password:</label>
+	    <input id="password" name="password" type="password">
+	    <button id="login-btn">Login</button>
+	    <p id="login-error"></p>
+	  </div>
+	  <div id="register-form">
+	    <label for="rusername">Username</label>
+	    <input id="rusername" name="rusername" type="text">
+	    <label for="rpassword">Password</label>
+	    <input id="rpassword" name="rpassword" type="password">
+	    <label for="rfirstname">First name</label>
+	    <input id="rfirstname" name="rfirstname" type="text">
+        <label for="rlastname">Last name</label>
+	    <input id="rlastname" name="rlastname" type="text">
+	    <button id="register-btn">Register</button>
+	    <p id="register-error"></p>
+	    <p id="register-success"></p>
+	  </div>
+
       <aside id="item-nav">
         <div class="nav-icon">
           <i class="fa fa-sitemap fa-2x"></i>
@@ -83,6 +109,8 @@
       </li>
     </ul>
   </footer>
+  
+  <script src="https://rawgit.com/emn178/js-md5/master/build/md5.min.js"></script>
   <script src="scripts/main.js"></script>
 </body>
 </html>
